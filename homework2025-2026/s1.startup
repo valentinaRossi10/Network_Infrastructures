@@ -1,0 +1,27 @@
+/etc/init.d/networking restart
+/etc/init.d/ssh restart
+
+useradd ubuntu -m 
+echo -e 'password\npassword\n' | passwd ubuntu
+
+# Create ssh folder and authorized_keys file
+mkdir /home/ubuntu/.ssh
+touch /home/ubuntu/.ssh/authorized_keys
+
+# Set correct permissions
+chown ubuntu:ubuntu /home/ubuntu/.ssh
+chmod 700 /home/ubuntu/.ssh
+chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+chmod 600 /home/ubuntu/.ssh/authorized_keys
+
+#wait for client to write its public key inside shared 
+
+while ! [ -e /shared/id_rsa.pub ]; do
+	echo Waiting for public key...
+	sleep 1
+done
+echo done
+cat /shared/id_rsa.pub > /home/ubuntu/.ssh/authorized_keys
+chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+chmod 600 /home/ubuntu/.ssh/authorized_keys
+rm /shared/id_rsa.pub

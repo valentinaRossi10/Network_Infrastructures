@@ -1,0 +1,19 @@
+/etc/init.d/networking restart
+
+#static routing
+ip route add default via 151.0.45.0
+
+iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+#nat 
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+#substituites ip address of the source with gw public ip address
+
+# block new connections from the outside to our nat
+iptables -A FORWARD -i eth0 -m state --state NEW -j DROP
+
+#dnat
+
+iptables -t nat -I PREROUTING 1 -p tcp --dport 1194 -j DNAT --to-destination 192.168.88.100:7070
+iptables -I FORWARD 1 -p tcp -d 192.168.88.100 --dport 7070 -j ACCEPT
+
